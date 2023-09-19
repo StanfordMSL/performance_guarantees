@@ -1,0 +1,14 @@
+/venv
+/__pycache__
+/archive
+/experiments/figures/archive
+/experiments/runs/archive
+/experiments/runs/valid_chance/archive
+/experiments/runs/valid_fixed_cvar/archive
+/experiments/runs/valid_fixed_exp/archive
+/experiments/runs/valid_fixed_multi_hyp/archive
+/experiments/runs/valid_fixed_var/archive
+/experiments/runs/valid_fixed_pr/archive
+/experiments/config_files/archive
+/experiments/config_files/valid_fixed_multi_hyp_plans/archive
+MUJOCO_LOG.TXT

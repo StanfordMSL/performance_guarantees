@@ -1,0 +1,17 @@
+simulation:
+  task_name: 'Ant-v4'
+  noise: 0.1
+  num_reps: 1000
+  num_envs_range_theory: [10, 50, 100, 500]
+  num_envs_range_empirical: [10]
+plans:
+  horizon: 20
+  num_samples: 20
+bounds:
+  delta: 0.2
+  epsilon: 0.3
+  num_theory: 1000
+  healthy_low: 0.5
+  healthy_high: 1.0
+  grid_density: 500
+  

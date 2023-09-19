@@ -1,0 +1,29 @@
+bounds:
+  delta: 0.2
+  epsilon: 0.3
+  num_envs: 30
+  num_theory: 500
+plans:
+  T: 100
+  num_plans: 20
+  random: false
+simulation:
+  density_bounds:
+  - 700
+  - 1200
+  friction_bounds:
+  - - 0.8
+    - 1.2
+  - - 0.004
+    - 0.006
+  - - 8.0e-05
+    - 0.00014
+  num_reps: 500
+  processes: 1
+  verbose: true
+solver:
+  horizon: 25
+  noise_std: 0.1
+  num_processes: 1
+  num_rollouts: 150
+  num_spline: 15
