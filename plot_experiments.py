@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import yaml
+import pdb
 
 '''
 
@@ -16,8 +17,8 @@ This file is used to plot the following experiments:
 '''
 
 # user input
-results_folder = "experiments/runs/valid_chance"
-run_folder = "20230821-164657" 
+results_folder = "experiments/runs/shift_fixed_var"
+run_folder = "20240523-013000" 
 
 # get filepaths from user input
 run_data = os.path.join(results_folder, run_folder, "results.npz")
@@ -161,9 +162,161 @@ elif experiment_name == "valid_fixed_multi_hyp":
 	fig.savefig(os.path.join(plot_folder, experiment_name + '.svg'), bbox_inches='tight')
 	fig.savefig(os.path.join(plot_folder, experiment_name + '.png'), bbox_inches='tight')
 
+
+
+elif experiment_name in  ['compare_fixed_exp', 'compare_fixed_var', 'compare_fixed_cvar']:
+	
+	# Generate plot label
+	if experiment_name == "compare_fixed_exp":
+		label = r'$\overline{\mathbb{E}} - \mathbb{E}$'
+		names = ['Ours', '[9]']
+	elif experiment_name == "compare_fixed_var":
+		label = r'$\overline{\textup{VaR}}_{\tau} - \textup{VaR}_{\tau}$'
+		names = ['Ours', '[32]', '[11]']
+	elif experiment_name == "compare_fixed_cvar":
+		label = r'$\overline{\textup{CVaR}}_{\tau} - \textup{CVaR}_{\tau}$'
+		names = ['Ours', '[9]']
+
+	colors = ['silver', 'red', 'blue']
+	quantile_colors = ['dimgray', 'firebrick', 'mediumblue']
+	bins = "auto"
+
+	# make and save figure
+	fig = plt.figure(figsize=(5,3))
+	# plt.hist(results["cost_samples"], label=r'$J$', alpha=0.7, bins=bins, density=True, color='skyblue')
+	# plt.axvline(results["true_stat"], linestyle='dashed', color='steelblue')
+
+	bound_samples = results["bound_samples"] - results["true_stat"]
+	quantiles = results["bound_quantiles"] - results["true_stat"]
+
+	for i in range(bound_samples.shape[0]):
+		name = names[i]
+		color = colors[i]
+		plt.hist(bound_samples[i], label=names[i], alpha=0.7, bins="auto", density=True, color=color)
+		plt.axvline(quantiles[i], linestyle='dashed', color=quantile_colors[i])
+	
+	plt.xlabel(label)
+	plt.ylabel('Empirical Density')
+	plt.legend(fontsize="13", loc="upper left")
+	plt.show(block=False)
+
+	fig.savefig(os.path.join(plot_folder, experiment_name + '.svg'), bbox_inches='tight')
+	fig.savefig(os.path.join(plot_folder, experiment_name + '.png'), bbox_inches='tight')
+
+elif experiment_name in ['shift_fixed_exp', 'shift_fixed_var', 'shift_fixed_cvar', 'shift_fixed_pr']:
+	# results data
+	emp_coverage = results["emp_coverage"]
+	theory_coverage = results["theory_coverage"]
+	emp_nominal_coverage = results["emp_nominal_coverage"]
+	theory_nominal_coverage = results["theory_nominal_coverage"]
+
+	emp_coverage = np.append(emp_coverage, emp_nominal_coverage)
+	theory_coverage = np.append(theory_coverage, theory_nominal_coverage)
+
+	# config parameters
+	nominal_noise = config["simulation"]["noise"]
+	noise_low = config["simulation"]["noise_low"]
+	noise_high = config["simulation"]["noise_high"]
+	num_shifted = config["simulation"]["num_shifted"]
+	delta = config["bounds"]["delta"]
+
+	noise_scales = np.linspace(noise_low, noise_high, num_shifted)
+	noise_scales = np.append(noise_scales, nominal_noise)
+
+	# Generate plot label
+	if experiment_name == "shift_fixed_exp":
+		ylabel = r'$\mathbb{E}(J_{true}) \leq \overline{\mathbb{E}}$'
+	elif experiment_name == "shift_fixed_var":
+		ylabel = r'$\textup{VaR}_{\tau}(J_{true}) \leq \overline{\textup{VaR}}_{\tau}$'
+	elif experiment_name == "shift_fixed_cvar":
+		ylabel = r'$\textup{CVaR}_{\tau}(J_{true}) \leq \overline{\textup{CVaR}}_{\tau}$'
+	elif experiment_name == "shift_fixed_pr":
+		ylabel = r'$q_{true} \leq \overline{q}$'
+	ylabel = r'$\textup{Pr}[$' + ylabel + r'$]$' # ' = 1 - \delta_{true}$'
+
+	# make and save figure
+	fig = plt.figure(figsize=(5,3))
+	plt.scatter(noise_scales, emp_coverage, marker='o', label='Empirical', color='blue')
+	# plt.scatter(nominal_noise, nominal_coverage, marker='*', label='Nominal Empirical', color='green')
+	plt.scatter(noise_scales, theory_coverage, marker='x', label='Theoretical', color='orange')
+
+	plt.plot(np.linspace(noise_low,noise_high,50), (1-delta) * np.ones(50), linestyle='dashed', color='darkgray')
+	plt.text(noise_low+0.001, 1-delta-0.1, r'$1 - \delta_{sim}$', fontsize=13, color='black') # Adjust to center label
+	plt.axvline(nominal_noise, linestyle='dotted', color='darkgray')
+	plt.text(nominal_noise+0.0025, 0.01, r'$\sigma_{sim}$', fontsize=13, color='black') # Adjust to center label
+
+	plt.xlabel(r'True Noise Parameter $\sigma$')
+	plt.ylabel(ylabel)
+	plt.legend(fontsize="13", loc="lower left")
+	plt.show(block=False)
+
+	fig.savefig(os.path.join(plot_folder, experiment_name + '.svg'), bbox_inches='tight')
+	fig.savefig(os.path.join(plot_folder, experiment_name + '.png'), bbox_inches='tight')
+
+
+elif experiment_name in ['robust_fixed_exp', 'robust_fixed_var', 'robust_fixed_cvar', 'robust_fixed_pr']:
+	# results data
+	emp_coverage = results["emp_coverage"] # shape num_shifted, num_alpha
+	emp_nominal_coverage = np.expand_dims(results["emp_nominal_coverage"], axis=0) # shape 1, num_alpha
+	emp_coverage = np.vstack([emp_coverage, emp_nominal_coverage]) # shape num_shifted + 1, num_alpha
+	alphas = results["alphas"]
+	ks_dists = results["ks_dists"]
+
+	# Generate plot label
+	if experiment_name == "robust_fixed_exp":
+		ylabel = r'$\mathbb{E}(J_{true}) \leq \overline{\mathbb{E}}(\alpha)$'
+	elif experiment_name == "robust_fixed_var":
+		ylabel = r'$\textup{VaR}_{\tau}(J_{true}) \leq \overline{\textup{VaR}}_{\tau}(\alpha)$'
+	elif experiment_name == "robust_fixed_cvar":
+		ylabel = r'$\textup{CVaR}_{\tau}(J_{true}) \leq \overline{\textup{CVaR}}_{\tau}(\alpha)$'
+	elif experiment_name == "robust_fixed_pr":
+		ylabel = r'$q_{true} \leq \overline{q}(\alpha)$'
+	ylabel = r'$\textup{Pr}[$' + ylabel + ']'
+
+	# config parameters
+	nominal_noise = config["simulation"]["noise"]
+	noise_low = config["simulation"]["noise_low"]
+	noise_high = config["simulation"]["noise_high"]
+	num_shifted = config["simulation"]["num_shifted"]
+	delta = config["bounds"]["delta"]
+
+	noise_scales = np.linspace(noise_low, noise_high, num_shifted)
+	noise_scales = np.append(noise_scales, nominal_noise)
+
+	ks_dists = np.append(ks_dists, 0)
+
+	# Re-order to insert nominal_noise in correct ascending position
+	order = np.argsort(noise_scales)
+	emp_coverage = emp_coverage[order, :]
+	noise_scales = noise_scales[order]
+	ks_dists = ks_dists[order]
+
+	# make and save figure
+	fig = plt.figure(figsize=(5,3))
+	for i, alpha in enumerate(alphas):
+
+		expect_no_hold = (ks_dists > alpha)
+		h = plt.plot(noise_scales, emp_coverage[:, i], label=r'$\alpha = $' + str(np.round(alpha, 3)))
+		# Plot with o where theory requires robust bound to hold, x where not required to hold
+		plt.scatter(noise_scales[np.where(expect_no_hold)], emp_coverage[np.where(expect_no_hold), i], marker='x', color=h[0].get_color())
+		plt.scatter(noise_scales[np.where(1-expect_no_hold)], emp_coverage[np.where(1-expect_no_hold), i], facecolors='none', marker='o', color=h[0].get_color())
+
+	plt.plot(np.linspace(noise_low,noise_high,50), (1-delta) * np.ones(50), linestyle='dashed', color='darkgray')
+	plt.text(noise_low+0.001, 1-delta+0.05, r'$1 - \delta$', fontsize=13, color='black') # Adjust to center label
+	plt.axvline(nominal_noise, linestyle='dotted', color='darkgray')
+	plt.text(nominal_noise+0.0025, 0.05, r'$\sigma_{sim}$', fontsize=13, color='black') # Adjust to center label
+	plt.ylim(0,1.05)
+
+	plt.xlabel(r'True Noise Parameter $\sigma$')
+	plt.ylabel(ylabel)
+	plt.legend(fontsize="13", loc="lower left")
+	plt.show(block=False)
+
+	fig.savefig(os.path.join(plot_folder, experiment_name + '.svg'), bbox_inches='tight')
+	fig.savefig(os.path.join(plot_folder, experiment_name + '.png'), bbox_inches='tight')
+
 else:
 	raise ValueError("\nInvalid experiment name given! \nCheck config filename.")
-
 
 
 

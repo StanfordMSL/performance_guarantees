@@ -1,6 +1,5 @@
-# performance_guarantees
-This repository accompanies the paper "Guarantees on Robot System Performance Using
-Stochastic Simulation Rollouts"
+# risk_sensitive_project
+This repository accompanies the paper "Distribution-Free Risk Sensitive Control of Robotic Systems".
 
 ## Summary of Repository
  - ```experiments.py```: Each figure in the paper is associated with an experiment. We use this file to run each experiment and save the data necessary for plotting the results. Each experiment requires a ```.yaml``` config file in order to run. A config file for each experiment is found in the ```experiments/config_files``` directory. When an experiment is run the results as well as the associated config file are saved in a timestamped folder in the ```experiments/runs``` directory. 
@@ -76,7 +75,7 @@ We set ```randomize_initial_position=False``` and ```randomize_initial_rotation=
 
 In ```/gymnasium_robotics/utils/mujoco_utils.py``` we added the function ```robot_set_obs(model, data, joint_names, pos_values, vel_values)``` which is called by ```_robot_set_obs(self, obs)``` in the ```/gymnasium_robotics/envs/shadow_dexterous_hand/manipulate.py```file.
 
-In ```manipulate.py``` we changed the ```compute_reward()``` function to have squared position and orientation terms in a weighted sum.
+In ```manipulate.py``` we changed the ```compute_reward()``` function.
 
 <!-- In ```/home/joe/Documents/risk_sensitive_project/venv/lib/python3.8/site-packages/gymnasium_robotics/envs/assets/hand/MainProcess.xml``` we changed the timestep from 0.002 to 0.01. Same for the other xml files there. Actually, was not necessary (just change the embedded xml strings in manipulate_block_egg_pen_touch_sensors.py) -->
 
