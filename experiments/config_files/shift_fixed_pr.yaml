@@ -1,0 +1,22 @@
+simulation:
+  task_name: 'Ant-v4'
+  noise: 0.3
+  num_reps: 1000
+  noise_low: 0.25
+  noise_high: 0.35
+  num_shifted: 10
+CEM:
+  horizon: 20
+  max_gen: 10
+  num_samples: 100
+  num_elite: 10
+  rand_envs: True
+  processes: 10
+  verbose: True
+bounds:
+  delta: 0.2
+  num_envs: 100
+  num_theory: 10000
+  healthy_low: 0.2
+  healthy_high: 1.0
+  

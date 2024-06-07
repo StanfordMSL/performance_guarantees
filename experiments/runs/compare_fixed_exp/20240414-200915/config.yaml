@@ -1,0 +1,16 @@
+CEM:
+  horizon: 20
+  max_gen: 10
+  num_elite: 10
+  num_samples: 100
+  processes: 10
+  rand_envs: true
+  verbose: true
+bounds:
+  delta: 0.2
+  num_envs: 100
+  num_theory: 10000
+simulation:
+  noise: 0.1
+  num_reps: 1000
+  task_name: Ant-v4
