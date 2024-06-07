@@ -1,5 +1,6 @@
-# risk_sensitive_project
-This repository accompanies the paper "Distribution-Free Risk Sensitive Control of Robotic Systems".
+# performance_guarantees
+This repository accompanies the paper "Guarantees on Robot System Performance Using
+Stochastic Simulation Rollouts"
 
 ## Summary of Repository
  - ```experiments.py```: Each figure in the paper is associated with an experiment. We use this file to run each experiment and save the data necessary for plotting the results. Each experiment requires a ```.yaml``` config file in order to run. A config file for each experiment is found in the ```experiments/config_files``` directory. When an experiment is run the results as well as the associated config file are saved in a timestamped folder in the ```experiments/runs``` directory. 
